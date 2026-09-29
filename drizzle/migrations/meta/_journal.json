@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790721731233,
+      "tag": "0000_orcai_schema",
+      "breakpoints": true
+    }
+  ]
 }

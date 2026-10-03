@@ -18,6 +18,8 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as OrcamentoTokenRouteImport } from './routes/orcamento.$token'
 import { Route as AuthenticatedPainelIndexRouteImport } from './routes/_authenticated/painel.index'
+import { Route as AuthenticatedPainelOrcamentosIndexRouteImport } from './routes/_authenticated/painel.orcamentos.index'
+import { Route as AuthenticatedPainelOrcamentosIdRouteImport } from './routes/_authenticated/painel.orcamentos.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +66,18 @@ const AuthenticatedPainelIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
+const AuthenticatedPainelOrcamentosIndexRoute =
+  AuthenticatedPainelOrcamentosIndexRouteImport.update({
+    id: '/orcamentos/',
+    path: '/orcamentos/',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelOrcamentosIdRoute =
+  AuthenticatedPainelOrcamentosIdRouteImport.update({
+    id: '/orcamentos/$id',
+    path: '/orcamentos/$id',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -74,6 +88,8 @@ export interface FileRoutesByFullPath {
   '/painel': typeof AuthenticatedPainelRouteWithChildren
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/painel/': typeof AuthenticatedPainelIndexRoute
+  '/painel/orcamentos/$id': typeof AuthenticatedPainelOrcamentosIdRoute
+  '/painel/orcamentos/': typeof AuthenticatedPainelOrcamentosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -83,6 +99,8 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/painel': typeof AuthenticatedPainelIndexRoute
+  '/painel/orcamentos/$id': typeof AuthenticatedPainelOrcamentosIdRoute
+  '/painel/orcamentos': typeof AuthenticatedPainelOrcamentosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,6 +113,8 @@ export interface FileRoutesById {
   '/_authenticated/painel': typeof AuthenticatedPainelRouteWithChildren
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/_authenticated/painel/': typeof AuthenticatedPainelIndexRoute
+  '/_authenticated/painel/orcamentos/$id': typeof AuthenticatedPainelOrcamentosIdRoute
+  '/_authenticated/painel/orcamentos/': typeof AuthenticatedPainelOrcamentosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,6 +127,8 @@ export interface FileRouteTypes {
     | '/painel'
     | '/orcamento/$token'
     | '/painel/'
+    | '/painel/orcamentos/$id'
+    | '/painel/orcamentos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -116,6 +138,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/orcamento/$token'
     | '/painel'
+    | '/painel/orcamentos/$id'
+    | '/painel/orcamentos'
   id:
     | '__root__'
     | '/'
@@ -127,6 +151,8 @@ export interface FileRouteTypes {
     | '/_authenticated/painel'
     | '/orcamento/$token'
     | '/_authenticated/painel/'
+    | '/_authenticated/painel/orcamentos/$id'
+    | '/_authenticated/painel/orcamentos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -204,15 +230,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelIndexRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
+    '/_authenticated/painel/orcamentos/': {
+      id: '/_authenticated/painel/orcamentos/'
+      path: '/orcamentos'
+      fullPath: '/painel/orcamentos/'
+      preLoaderRoute: typeof AuthenticatedPainelOrcamentosIndexRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
+    '/_authenticated/painel/orcamentos/$id': {
+      id: '/_authenticated/painel/orcamentos/$id'
+      path: '/orcamentos/$id'
+      fullPath: '/painel/orcamentos/$id'
+      preLoaderRoute: typeof AuthenticatedPainelOrcamentosIdRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
   }
 }
 
 interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelIndexRoute: typeof AuthenticatedPainelIndexRoute
+  AuthenticatedPainelOrcamentosIdRoute: typeof AuthenticatedPainelOrcamentosIdRoute
+  AuthenticatedPainelOrcamentosIndexRoute: typeof AuthenticatedPainelOrcamentosIndexRoute
 }
 
 const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelIndexRoute: AuthenticatedPainelIndexRoute,
+  AuthenticatedPainelOrcamentosIdRoute: AuthenticatedPainelOrcamentosIdRoute,
+  AuthenticatedPainelOrcamentosIndexRoute:
+    AuthenticatedPainelOrcamentosIndexRoute,
 }
 
 const AuthenticatedPainelRouteWithChildren =

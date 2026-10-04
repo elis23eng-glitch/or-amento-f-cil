@@ -15,9 +15,14 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ExemploRouteImport } from './routes/exemplo'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as OrcamentoTokenRouteImport } from './routes/orcamento.$token'
 import { Route as AuthenticatedPainelIndexRouteImport } from './routes/_authenticated/painel.index'
+import { Route as AuthenticatedPainelClientesRouteImport } from './routes/_authenticated/painel.clientes'
+import { Route as AuthenticatedPainelEmpresaRouteImport } from './routes/_authenticated/painel.empresa'
+import { Route as AuthenticatedPainelPlanoRouteImport } from './routes/_authenticated/painel.plano'
+import { Route as AuthenticatedPainelServicosRouteImport } from './routes/_authenticated/painel.servicos'
 import { Route as AuthenticatedPainelOrcamentosIndexRouteImport } from './routes/_authenticated/painel.orcamentos.index'
 import { Route as AuthenticatedPainelOrcamentosIdRouteImport } from './routes/_authenticated/painel.orcamentos.$id'
 
@@ -50,6 +55,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
@@ -64,6 +74,30 @@ const AuthenticatedPainelIndexRoute =
   AuthenticatedPainelIndexRouteImport.update({
     id: '/',
     path: '/',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelClientesRoute =
+  AuthenticatedPainelClientesRouteImport.update({
+    id: '/clientes',
+    path: '/clientes',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelEmpresaRoute =
+  AuthenticatedPainelEmpresaRouteImport.update({
+    id: '/empresa',
+    path: '/empresa',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelPlanoRoute =
+  AuthenticatedPainelPlanoRouteImport.update({
+    id: '/plano',
+    path: '/plano',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelServicosRoute =
+  AuthenticatedPainelServicosRouteImport.update({
+    id: '/servicos',
+    path: '/servicos',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
 const AuthenticatedPainelOrcamentosIndexRoute =
@@ -85,8 +119,13 @@ export interface FileRoutesByFullPath {
   '/exemplo': typeof ExemploRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/painel': typeof AuthenticatedPainelRouteWithChildren
   '/orcamento/$token': typeof OrcamentoTokenRoute
+  '/painel/clientes': typeof AuthenticatedPainelClientesRoute
+  '/painel/empresa': typeof AuthenticatedPainelEmpresaRoute
+  '/painel/plano': typeof AuthenticatedPainelPlanoRoute
+  '/painel/servicos': typeof AuthenticatedPainelServicosRoute
   '/painel/': typeof AuthenticatedPainelIndexRoute
   '/painel/orcamentos/$id': typeof AuthenticatedPainelOrcamentosIdRoute
   '/painel/orcamentos/': typeof AuthenticatedPainelOrcamentosIndexRoute
@@ -97,7 +136,12 @@ export interface FileRoutesByTo {
   '/exemplo': typeof ExemploRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/orcamento/$token': typeof OrcamentoTokenRoute
+  '/painel/clientes': typeof AuthenticatedPainelClientesRoute
+  '/painel/empresa': typeof AuthenticatedPainelEmpresaRoute
+  '/painel/plano': typeof AuthenticatedPainelPlanoRoute
+  '/painel/servicos': typeof AuthenticatedPainelServicosRoute
   '/painel': typeof AuthenticatedPainelIndexRoute
   '/painel/orcamentos/$id': typeof AuthenticatedPainelOrcamentosIdRoute
   '/painel/orcamentos': typeof AuthenticatedPainelOrcamentosIndexRoute
@@ -110,8 +154,13 @@ export interface FileRoutesById {
   '/exemplo': typeof ExemploRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRouteWithChildren
   '/orcamento/$token': typeof OrcamentoTokenRoute
+  '/_authenticated/painel/clientes': typeof AuthenticatedPainelClientesRoute
+  '/_authenticated/painel/empresa': typeof AuthenticatedPainelEmpresaRoute
+  '/_authenticated/painel/plano': typeof AuthenticatedPainelPlanoRoute
+  '/_authenticated/painel/servicos': typeof AuthenticatedPainelServicosRoute
   '/_authenticated/painel/': typeof AuthenticatedPainelIndexRoute
   '/_authenticated/painel/orcamentos/$id': typeof AuthenticatedPainelOrcamentosIdRoute
   '/_authenticated/painel/orcamentos/': typeof AuthenticatedPainelOrcamentosIndexRoute
@@ -124,8 +173,13 @@ export interface FileRouteTypes {
     | '/exemplo'
     | '/privacidade'
     | '/reset-password'
+    | '/admin'
     | '/painel'
     | '/orcamento/$token'
+    | '/painel/clientes'
+    | '/painel/empresa'
+    | '/painel/plano'
+    | '/painel/servicos'
     | '/painel/'
     | '/painel/orcamentos/$id'
     | '/painel/orcamentos/'
@@ -136,7 +190,12 @@ export interface FileRouteTypes {
     | '/exemplo'
     | '/privacidade'
     | '/reset-password'
+    | '/admin'
     | '/orcamento/$token'
+    | '/painel/clientes'
+    | '/painel/empresa'
+    | '/painel/plano'
+    | '/painel/servicos'
     | '/painel'
     | '/painel/orcamentos/$id'
     | '/painel/orcamentos'
@@ -148,8 +207,13 @@ export interface FileRouteTypes {
     | '/exemplo'
     | '/privacidade'
     | '/reset-password'
+    | '/_authenticated/admin'
     | '/_authenticated/painel'
     | '/orcamento/$token'
+    | '/_authenticated/painel/clientes'
+    | '/_authenticated/painel/empresa'
+    | '/_authenticated/painel/plano'
+    | '/_authenticated/painel/servicos'
     | '/_authenticated/painel/'
     | '/_authenticated/painel/orcamentos/$id'
     | '/_authenticated/painel/orcamentos/'
@@ -209,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/painel': {
       id: '/_authenticated/painel'
       path: '/painel'
@@ -230,6 +301,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelIndexRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
+    '/_authenticated/painel/clientes': {
+      id: '/_authenticated/painel/clientes'
+      path: '/clientes'
+      fullPath: '/painel/clientes'
+      preLoaderRoute: typeof AuthenticatedPainelClientesRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
+    '/_authenticated/painel/empresa': {
+      id: '/_authenticated/painel/empresa'
+      path: '/empresa'
+      fullPath: '/painel/empresa'
+      preLoaderRoute: typeof AuthenticatedPainelEmpresaRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
+    '/_authenticated/painel/plano': {
+      id: '/_authenticated/painel/plano'
+      path: '/plano'
+      fullPath: '/painel/plano'
+      preLoaderRoute: typeof AuthenticatedPainelPlanoRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
+    '/_authenticated/painel/servicos': {
+      id: '/_authenticated/painel/servicos'
+      path: '/servicos'
+      fullPath: '/painel/servicos'
+      preLoaderRoute: typeof AuthenticatedPainelServicosRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
     '/_authenticated/painel/orcamentos/': {
       id: '/_authenticated/painel/orcamentos/'
       path: '/orcamentos'
@@ -248,12 +347,20 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedPainelRouteChildren {
+  AuthenticatedPainelClientesRoute: typeof AuthenticatedPainelClientesRoute
+  AuthenticatedPainelEmpresaRoute: typeof AuthenticatedPainelEmpresaRoute
+  AuthenticatedPainelPlanoRoute: typeof AuthenticatedPainelPlanoRoute
+  AuthenticatedPainelServicosRoute: typeof AuthenticatedPainelServicosRoute
   AuthenticatedPainelIndexRoute: typeof AuthenticatedPainelIndexRoute
   AuthenticatedPainelOrcamentosIdRoute: typeof AuthenticatedPainelOrcamentosIdRoute
   AuthenticatedPainelOrcamentosIndexRoute: typeof AuthenticatedPainelOrcamentosIndexRoute
 }
 
 const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
+  AuthenticatedPainelClientesRoute: AuthenticatedPainelClientesRoute,
+  AuthenticatedPainelEmpresaRoute: AuthenticatedPainelEmpresaRoute,
+  AuthenticatedPainelPlanoRoute: AuthenticatedPainelPlanoRoute,
+  AuthenticatedPainelServicosRoute: AuthenticatedPainelServicosRoute,
   AuthenticatedPainelIndexRoute: AuthenticatedPainelIndexRoute,
   AuthenticatedPainelOrcamentosIdRoute: AuthenticatedPainelOrcamentosIdRoute,
   AuthenticatedPainelOrcamentosIndexRoute:
@@ -264,10 +371,12 @@ const AuthenticatedPainelRouteWithChildren =
   AuthenticatedPainelRoute._addFileChildren(AuthenticatedPainelRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRouteWithChildren,
 }
 

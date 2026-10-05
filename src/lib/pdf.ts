@@ -141,7 +141,7 @@ export async function generateQuotePdf(options: {
 
   // Itens
   sectionTitle(ctx, "Itens", runningTitle);
-  const colX = [M, M + 96, M + 116, M + 136, M + CONTENT];
+  const colX: [number, number, number, number, number] = [M, M + 96, M + 116, M + 136, M + CONTENT];
 
   const drawItemsHeader = () => {
     ensure(ctx, 10, runningTitle);
@@ -149,7 +149,7 @@ export async function generateQuotePdf(options: {
     doc.setFontSize(8.5);
     doc.setFillColor(238, 242, 246);
     doc.rect(M, ctx.y - 4, CONTENT, 6.5, "F");
-    doc.text("Descrição", (colX[0] ?? M) + 1, ctx.y);
+    doc.text("Descrição", colX[0] + 1, ctx.y);
     doc.text("Un.", colX[1], ctx.y);
     doc.text("Qtde", colX[2], ctx.y);
     doc.text("Preço un.", colX[3], ctx.y);

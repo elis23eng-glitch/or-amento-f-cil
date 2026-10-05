@@ -3,7 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { normalizeBRPhone } from "./phone";
 
-async function assertAdmin(supabase: { rpc: (fn: string) => Promise<{ data: unknown }> }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertAdmin(supabase: any) {
   const { data } = await supabase.rpc("is_admin");
   if (data !== true) throw new Error("Acesso restrito à administração do Orçai.");
   return true;

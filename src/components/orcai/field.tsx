@@ -15,7 +15,7 @@ export function Field({
   hint?: string;
   error?: string | null;
   required?: boolean;
-  children: (props: { id: string; "aria-describedby"?: string }) => ReactNode;
+  children: (props: { id: string; "aria-describedby": string | undefined }) => ReactNode;
   className?: string;
 }) {
   const id = useId();

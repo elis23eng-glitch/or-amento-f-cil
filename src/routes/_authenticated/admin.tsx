@@ -39,7 +39,7 @@ function AdminContent() {
   const audit = useQuery({ queryKey: ["admin-audit"], queryFn: () => adminAudit() });
   const [wa, setWa] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
-  useEffect(() => { setWa(q.data?.settings.admin_whatsapp ? formatBRPhone(q.data.settings.admin_whatsapp) : ""); }, [q.data]);
+  useEffect(() => { setWa(q.data?.settings["admin_whatsapp"] ? formatBRPhone(q.data.settings["admin_whatsapp"]) : ""); }, [q.data]);
 
   async function run(label: string, fn: () => Promise<unknown>, ok: string) {
     setBusy(label);
@@ -73,7 +73,7 @@ function AdminContent() {
             <Input aria-label="WhatsApp da administradora" className="max-w-xs" inputMode="tel" placeholder="(DDD) número" value={wa} onChange={(e) => setWa(e.target.value)} />
             <Button disabled={!!busy} onClick={() => run("wa", () => adminSetSetting({ data: { key: "admin_whatsapp", value: wa || null } }), "WhatsApp salvo.")}>Salvar</Button>
           </div>
-          {!d.settings.admin_whatsapp ? <p className="text-xs text-warning-foreground">Não configurado: pedidos são salvos com contato pendente.</p> : null}
+          {!d.settings["admin_whatsapp"] ? <p className="text-xs text-warning-foreground">Não configurado: pedidos são salvos com contato pendente.</p> : null}
         </section>
 
         <section className="surface grid gap-3 p-4">
@@ -153,7 +153,7 @@ function UserRow({ u, today, busy, run }: { u: AdminUser; today: string; busy: b
         <div className="mt-2 flex flex-wrap gap-2">
           <Button size="sm" disabled={busy} onClick={() => {
             const cents = parseMoneyToCents(amount);
-            if (cents === null) return toast.error("Valor inválido.");
+            if (cents === null) return void toast.error("Valor inválido.");
             run("pay", () => adminConfirmPayment({ data: { user_id: u.id, amount_cents: cents, paid_on: paidOn, method, note: null, starts_on: starts, ends_on: ends } }), "Pagamento confirmado.");
           }}>Confirmar pagamento</Button>
           <Button size="sm" variant="outline" disabled={busy} onClick={() => run("sub", () => adminSetSubscription({ data: { user_id: u.id, status: "encerrada", starts_on: sub?.starts_on ?? null, ends_on: today } }), "Assinatura encerrada.")}>Encerrar assinatura</Button>

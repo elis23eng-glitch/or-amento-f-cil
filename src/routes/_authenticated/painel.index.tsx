@@ -26,14 +26,14 @@ function Overview() {
 
   async function addReminder(e: React.FormEvent) {
     e.preventDefault();
-    if (!note.trim()) return toast.error("Escreva o lembrete.");
+    if (!note.trim()) return void toast.error("Escreva o lembrete.");
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const { error: err } = await supabase
       .from("reminders")
       .insert({ owner_id: u.user!.id, note: note.trim().slice(0, 300), due_on: due });
     setSaving(false);
-    if (err) return toast.error("Não foi possível salvar o lembrete.");
+    if (err) return void toast.error("Não foi possível salvar o lembrete.");
     setNote("");
     toast.success("Lembrete salvo.");
     qc.invalidateQueries({ queryKey: ["dashboard"] });

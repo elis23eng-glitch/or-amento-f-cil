@@ -240,7 +240,7 @@ function QuoteEditor() {
 
   useEffect(() => {
     if (isNew) {
-      setForm({ ...EMPTY, items: [{ ...EMPTY.items[0], key: newKey() }] });
+      setForm({ ...EMPTY, items: [{ description: "", unit: "m2", quantity: "", price: "", key: newKey() }] });
       setDirty(false);
       return;
     }
@@ -300,12 +300,12 @@ function QuoteEditor() {
       const items = [...f.items];
       const j = index + dir;
       if (j < 0 || j >= items.length) return f;
-      [items[index], items[j]] = [items[j], items[index]];
+      const a = items[index]!; items[index] = items[j]!; items[j] = a;
       return { ...f, items };
     });
     setDirty(true);
   }
-  function addItem(seed?: Partial<ItemForm>) {
+  function addItem(seed?: { description?: string; unit?: string; price?: string }) {
     setForm((f) => ({
       ...f,
       items: [...f.items, { key: newKey(), description: "", unit: "m2", quantity: "", price: "", ...seed }],
@@ -473,8 +473,9 @@ function QuoteEditor() {
 
   async function saveToCatalog(index: number) {
     const it = form.items[index];
+    if (!it) return;
     const price = parseMoneyToCents(it.price || "0");
-    if (!it.description.trim() || price === null) return toast.error("Preencha descrição e preço.");
+    if (!it.description.trim() || price === null) return void toast.error("Preencha descrição e preço.");
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("catalog_services").insert({
       owner_id: u.user!.id,
@@ -482,7 +483,7 @@ function QuoteEditor() {
       unit: it.unit,
       unit_price_cents: price,
     });
-    if (error) return toast.error("Não foi possível salvar no catálogo.");
+    if (error) return void toast.error("Não foi possível salvar no catálogo.");
     toast.success("Salvo nos serviços frequentes.");
     qc.invalidateQueries({ queryKey: ["catalog"] });
   }
@@ -681,7 +682,7 @@ function QuoteEditor() {
             </ol>
             <datalist id="service-suggestions">
               {SERVICE_SUGGESTIONS.map((s) => (
-                <option key={s} value={s} />
+                <option key={s.description} value={s.description} />
               ))}
             </datalist>
             <div className="flex flex-wrap gap-2">
@@ -706,7 +707,7 @@ function QuoteEditor() {
               ) : null}
             </div>
             <p className="text-xs text-muted-foreground">
-              Sugestões: {SERVICE_SUGGESTIONS.join(", ")}. Os preços são sempre informados por você.
+              Sugestões: {SERVICE_SUGGESTIONS.map((s) => s.description).join(", ")}. Os preços são sempre informados por você.
             </p>
           </section>
 

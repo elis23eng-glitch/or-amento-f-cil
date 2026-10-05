@@ -376,7 +376,7 @@ export const publishQuote = createServerFn({ method: "POST" })
       throw new Error("Adicione ao menos um item antes de publicar.");
     }
 
-    const parsedItems = items.map((i) => ({ ...i, quantity: Number(i.quantity) }));
+    const parsedItems = items.map((i) => ({ ...i, unit: i.unit as QuotePayload["items"][number]["unit"], quantity: Number(i.quantity) }));
     const totals = validateAndCompute({
       ...(quote as unknown as QuotePayload),
       tax_percent: Number(quote.tax_percent),
@@ -436,7 +436,7 @@ export const publishQuote = createServerFn({ method: "POST" })
         quote_id: data.id,
         owner_id: userId,
         version: (lastVersion?.[0]?.version ?? 0) + 1,
-        snapshot: snapshot as unknown as Record<string, unknown>,
+        snapshot: JSON.parse(JSON.stringify(snapshot)),
         total_cents: totals.total_cents,
         valid_until: quote.valid_until,
       })

@@ -61,9 +61,9 @@ function CompanyPage() {
     const parsed = schema.safeParse(form);
     const errs: Record<string, string> = {};
     if (!parsed.success) for (const i of parsed.error.issues) errs[String(i.path[0])] = i.message;
-    if (form.whatsapp && !normalizeBRPhone(form.whatsapp)) errs.whatsapp = "WhatsApp inválido. Use DDD + número.";
+    if (form.whatsapp && !normalizeBRPhone(form.whatsapp)) errs["whatsapp"] = "WhatsApp inválido. Use DDD + número.";
     setErrors(errs);
-    if (Object.keys(errs).length || !parsed.success) return toast.error("Corrija os campos destacados.");
+    if (Object.keys(errs).length || !parsed.success) return void toast.error("Corrija os campos destacados.");
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const n = (s: string) => s || null;
@@ -77,22 +77,22 @@ function CompanyPage() {
       ? await supabase.from("companies").update(row).eq("id", existing.id)
       : await supabase.from("companies").insert(row);
     setSaving(false);
-    if (error) return toast.error("Não foi possível salvar.");
+    if (error) return void toast.error("Não foi possível salvar.");
     toast.success("Empresa salva.");
     await qc.invalidateQueries({ queryKey: ["company"] });
     if (!existing) navigate({ to: "/painel" });
   }
 
   async function upload(file: File) {
-    if (!ALLOWED.includes(file.type)) return toast.error("Use uma imagem PNG, JPG ou WEBP.");
-    if (file.size > 2 * 1024 * 1024) return toast.error("A logo deve ter no máximo 2 MB.");
-    if (!q.data?.company) return toast.error("Salve os dados da empresa antes de enviar a logo.");
+    if (!ALLOWED.includes(file.type)) return void toast.error("Use uma imagem PNG, JPG ou WEBP.");
+    if (file.size > 2 * 1024 * 1024) return void toast.error("A logo deve ter no máximo 2 MB.");
+    if (!q.data?.company) return void toast.error("Salve os dados da empresa antes de enviar a logo.");
     setUploading(true);
     const { data: u } = await supabase.auth.getUser();
-    const ext = file.type.split("/")[1].replace("jpeg", "jpg");
+    const ext = (file.type.split("/")[1] ?? "png").replace("jpeg", "jpg");
     const path = `${u.user!.id}/logo-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("logos").upload(path, file, { contentType: file.type });
-    if (error) { setUploading(false); return toast.error("Falha no envio da logo."); }
+    if (error) { setUploading(false); return void toast.error("Falha no envio da logo."); }
     await supabase.from("companies").update({ logo_path: path }).eq("id", q.data.company.id);
     setUploading(false);
     toast.success("Logo atualizada.");

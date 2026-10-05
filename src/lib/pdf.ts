@@ -141,7 +141,7 @@ export async function generateQuotePdf(options: {
 
   // Itens
   sectionTitle(ctx, "Itens", runningTitle);
-  const colX = [M, M + 96, M + 116, M + 136, M + CONTENT];
+  const colX: [number, number, number, number, number] = [M, M + 96, M + 116, M + 136, M + CONTENT];
 
   const drawItemsHeader = () => {
     ensure(ctx, 10, runningTitle);

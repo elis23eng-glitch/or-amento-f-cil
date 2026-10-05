@@ -474,7 +474,7 @@ function QuoteEditor() {
   async function saveToCatalog(index: number) {
     const it = form.items[index];
     const price = parseMoneyToCents(it.price || "0");
-    if (!it.description.trim() || price === null) return toast.error("Preencha descrição e preço.");
+    if (!it.description.trim() || price === null) return void toast.error("Preencha descrição e preço.");
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("catalog_services").insert({
       owner_id: u.user!.id,
@@ -482,7 +482,7 @@ function QuoteEditor() {
       unit: it.unit,
       unit_price_cents: price,
     });
-    if (error) return toast.error("Não foi possível salvar no catálogo.");
+    if (error) return void toast.error("Não foi possível salvar no catálogo.");
     toast.success("Salvo nos serviços frequentes.");
     qc.invalidateQueries({ queryKey: ["catalog"] });
   }

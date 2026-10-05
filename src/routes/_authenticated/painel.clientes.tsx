@@ -24,8 +24,8 @@ function ClientsPage() {
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
-    if (form.name.trim().length < 2) return toast.error("Informe o nome do cliente.");
-    if (form.phone && !normalizeBRPhone(form.phone)) return toast.error("Telefone inválido. Use DDD + número.");
+    if (form.name.trim().length < 2) return void toast.error("Informe o nome do cliente.");
+    if (form.phone && !normalizeBRPhone(form.phone)) return void toast.error("Telefone inválido. Use DDD + número.");
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("clients").insert({
@@ -36,7 +36,7 @@ function ClientsPage() {
       city: form.city.trim().slice(0, 120) || null,
     });
     setSaving(false);
-    if (error) return toast.error("Não foi possível salvar o cliente.");
+    if (error) return void toast.error("Não foi possível salvar o cliente.");
     toast.success("Cliente salvo.");
     setForm({ name: "", phone: "", kind: "pf", city: "" });
     qc.invalidateQueries({ queryKey: ["clients"] });
@@ -46,7 +46,7 @@ function ClientsPage() {
     if (!window.confirm("Excluir este cliente? Orçamentos existentes não são alterados.")) return;
     await supabase.from("quotes").update({ client_id: null }).eq("client_id", id);
     const { error } = await supabase.from("clients").delete().eq("id", id);
-    if (error) return toast.error("Não foi possível excluir.");
+    if (error) return void toast.error("Não foi possível excluir.");
     qc.invalidateQueries({ queryKey: ["clients"] });
   }
 

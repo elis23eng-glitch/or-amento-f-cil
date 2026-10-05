@@ -66,25 +66,25 @@ function AuthPage() {
 
     if (modo === "recuperar") {
       const parsed = z.string().trim().email().safeParse(email);
-      if (!parsed.success) return setError("Informe um e-mail válido.");
+      if (!parsed.success) return void setError("Informe um e-mail válido.");
       setLoading(true);
       const { error: err } = await supabase.auth.resetPasswordForEmail(parsed.data, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       setLoading(false);
-      if (err) return setError("Não foi possível enviar o e-mail agora. Tente novamente.");
+      if (err) return void setError("Não foi possível enviar o e-mail agora. Tente novamente.");
       setInfo("Se houver uma conta com esse e-mail, enviamos um link para criar uma nova senha.");
       return;
     }
 
     const parsed = credentials.safeParse({ email, password });
-    if (!parsed.success) return setError(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+    if (!parsed.success) return void setError(parsed.error.issues[0]?.message ?? "Dados inválidos.");
 
     setLoading(true);
     if (modo === "cadastro") {
       if (fullName.trim().length < 2) {
         setLoading(false);
-        return setError("Informe seu nome.");
+        return void setError("Informe seu nome.");
       }
       const { data, error: err } = await supabase.auth.signUp({
         email: parsed.data.email,
@@ -96,7 +96,7 @@ function AuthPage() {
       });
       setLoading(false);
       if (err) {
-        return setError(
+        return void setError(
           err.message.includes("registered")
             ? "Já existe uma conta com esse e-mail. Tente entrar."
             : "Não foi possível criar a conta. Verifique os dados e tente novamente.",
@@ -115,7 +115,7 @@ function AuthPage() {
     const { error: err } = await supabase.auth.signInWithPassword(parsed.data);
     setLoading(false);
     if (err) {
-      return setError(
+      return void setError(
         err.message.toLowerCase().includes("confirm")
           ? "Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada."
           : "E-mail ou senha incorretos.",

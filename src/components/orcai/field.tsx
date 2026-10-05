@@ -12,11 +12,11 @@ export function Field({
   className,
 }: {
   label: string;
-  hint?: string;
-  error?: string | null;
-  required?: boolean;
+  hint?: string | undefined;
+  error?: string | null | undefined;
+  required?: boolean | undefined;
   children: (props: { id: string; "aria-describedby": string | undefined }) => ReactNode;
-  className?: string;
+  className?: string | undefined;
 }) {
   const id = useId();
   const hintId = `${id}-hint`;

@@ -26,15 +26,15 @@ function CatalogPage() {
   async function add(e: React.FormEvent) {
     e.preventDefault();
     const price = parseMoneyToCents(form.price);
-    if (!form.description.trim()) return toast.error("Informe a descrição.");
-    if (price === null || price < 0) return toast.error("Preço inválido.");
+    if (!form.description.trim()) return void toast.error("Informe a descrição.");
+    if (price === null || price < 0) return void toast.error("Preço inválido.");
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("catalog_services").insert({
       owner_id: u.user!.id, description: form.description.trim().slice(0, 300), unit: form.unit, unit_price_cents: price,
     });
     setSaving(false);
-    if (error) return toast.error("Não foi possível salvar.");
+    if (error) return void toast.error("Não foi possível salvar.");
     toast.success("Serviço salvo.");
     setForm({ description: "", unit: "m2", price: "" });
     qc.invalidateQueries({ queryKey: ["catalog"] });
@@ -42,7 +42,7 @@ function CatalogPage() {
 
   async function remove(id: string) {
     const { error } = await supabase.from("catalog_services").delete().eq("id", id);
-    if (error) return toast.error("Não foi possível excluir.");
+    if (error) return void toast.error("Não foi possível excluir.");
     qc.invalidateQueries({ queryKey: ["catalog"] });
   }
 

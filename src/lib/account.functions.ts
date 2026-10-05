@@ -33,5 +33,5 @@ export const exportMyData = createServerFn({ method: "GET" })
         subscriptions: subs.data,
         manual_payments: pays.data,
       }),
-    ) as Record<string, string | number | boolean | null | object>;
+    ) as { exported_at: string } & Record<string, object | string | null>;
   });

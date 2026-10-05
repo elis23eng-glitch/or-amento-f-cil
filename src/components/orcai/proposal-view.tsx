@@ -22,9 +22,9 @@ export function ProposalView({
   version,
 }: {
   snapshot: QuoteSnapshot;
-  logoUrl?: string | null;
-  draft?: boolean;
-  version?: number | null;
+  logoUrl?: string | null | undefined;
+  draft?: boolean | undefined;
+  version?: number | null | undefined;
 }) {
   const { company, quote, items, totals } = snapshot;
   return (

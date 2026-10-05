@@ -62,7 +62,7 @@ function CatalogPage() {
           )}
         </Field>
         <Field label="Preço (R$)" required>{(p) => <Input {...p} inputMode="decimal" placeholder="0,00" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />}</Field>
-        <datalist id="sugs">{SERVICE_SUGGESTIONS.map((s) => <option key={s} value={s} />)}</datalist>
+        <datalist id="sugs">{SERVICE_SUGGESTIONS.map((s) => <option key={s.description} value={s.description} />)}</datalist>
         <Button type="submit" disabled={saving} className="h-11 bg-accent font-bold text-accent-foreground sm:col-span-3">
           {saving ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />} Adicionar serviço
         </Button>

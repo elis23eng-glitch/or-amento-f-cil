@@ -240,7 +240,7 @@ function QuoteEditor() {
 
   useEffect(() => {
     if (isNew) {
-      setForm({ ...EMPTY, items: [{ ...EMPTY.items[0], key: newKey() }] });
+      setForm({ ...EMPTY, items: [{ description: "", unit: "m2", quantity: "", price: "", key: newKey() }] });
       setDirty(false);
       return;
     }

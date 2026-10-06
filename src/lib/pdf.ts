@@ -57,7 +57,7 @@ export async function generateQuotePdf(options: {
   draft?: boolean;
   version?: number | null;
 }): Promise<void> {
-  const { snapshot, logoDataUrl, draft } = options;
+  const { snapshot, logoDataUrl, draft, version } = options;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const ctx: Ctx = { doc, y: M, page: 1 };
   const company = snapshot.company;
@@ -68,43 +68,34 @@ export async function generateQuotePdf(options: {
   let headerTextX = M;
   if (logoDataUrl) {
     try {
-      doc.addImage(logoDataUrl, M, ctx.y, 24, 24, undefined, "FAST");
-      headerTextX = M + 28;
+      doc.addImage(logoDataUrl, M, ctx.y, 18, 18, undefined, "FAST");
+      headerTextX = M + 22;
     } catch {
       headerTextX = M;
     }
   }
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
+  doc.setFontSize(14);
   doc.setTextColor(21, 50, 79);
-  doc.text(company.trade_name, headerTextX, ctx.y + 6);
+  doc.text(company.trade_name, headerTextX, ctx.y + 5);
   doc.setTextColor(60);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
-  const companyLines = [
-    company.responsible_name ? `Responsável: ${company.responsible_name}` : null,
-    company.whatsapp ? `WhatsApp: ${formatBRPhone(company.whatsapp)}` : null,
-    company.city,
-    company.cnpj ? `CNPJ: ${company.cnpj}` : null,
-    company.email,
-    company.address,
-    company.website,
-  ].filter(Boolean) as string[];
-  let ly = ctx.y + 11;
-  for (const line of companyLines.slice(0, 6)) {
-    doc.text(line, headerTextX, ly);
-    ly += 3.6;
-  }
+  doc.setFontSize(7.5);
+  if (company.responsible_name)
+    doc.text(`RESPONSÁVEL: ${company.responsible_name}`.toUpperCase(), headerTextX, ctx.y + 10);
 
   doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(45, 52, 65);
+  doc.text("PROPOSTA COMERCIAL", W - M, ctx.y + 2, { align: "right" });
   doc.setFontSize(11);
   doc.setTextColor(21, 50, 79);
-  doc.text(`ORÇAMENTO Nº ${q.number}`, W - M, ctx.y + 6, { align: "right" });
+  doc.text(`ORC-${String(q.number).padStart(4, "0")}`, W - M, ctx.y + 7, { align: "right" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(60);
-  doc.text(`Data: ${formatDateBR(q.quote_date)}`, W - M, ctx.y + 11, { align: "right" });
-  doc.text(`Validade: ${formatDateBR(q.valid_until)}`, W - M, ctx.y + 15, { align: "right" });
+  doc.text(`Emitida em ${formatDateBR(q.quote_date)}`, W - M, ctx.y + 12, { align: "right" });
+  if (version) doc.text(`Versão ${version}`, W - M, ctx.y + 16, { align: "right" });
   if (draft) {
     doc.setTextColor(200, 80, 10);
     doc.setFont("helvetica", "bold");
@@ -112,7 +103,7 @@ export async function generateQuotePdf(options: {
   }
   doc.setTextColor(20);
 
-  ctx.y = Math.max(ly, ctx.y + 26) + 2;
+  ctx.y += 24;
   doc.setDrawColor(21, 50, 79);
   doc.setLineWidth(0.5);
   doc.line(M, ctx.y, W - M, ctx.y);
@@ -231,15 +222,45 @@ export async function generateQuotePdf(options: {
     wrapped(ctx, q.notes, 9.5, false, runningTitle);
   }
 
-  // Rodapé com numeração
+  // Rodapé no estilo do modelo: assinaturas e dados de contato da empresa.
+  if (ctx.y > H - 55) addPage(ctx, runningTitle);
+  const signatureY = Math.max(ctx.y + 12, H - 42);
+  const signatureWidth = 82;
+  doc.setDrawColor(190, 200, 210);
+  doc.line(M, signatureY, M + signatureWidth, signatureY);
+  doc.line(W - M - signatureWidth, signatureY, W - M, signatureY);
+  doc.setTextColor(45, 52, 65);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.text(company.trade_name, M + signatureWidth / 2, signatureY + 5, { align: "center" });
+  doc.text(q.client_name || "Cliente", W - M - signatureWidth / 2, signatureY + 5, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(110);
+  doc.text("CONTRATADA", M + signatureWidth / 2, signatureY + 9, { align: "center" });
+  doc.text("CONTRATANTE", W - M - signatureWidth / 2, signatureY + 9, { align: "center" });
+
+  const companyContacts = [
+    company.cnpj ? `CNPJ ${company.cnpj}` : null,
+    company.whatsapp ? formatBRPhone(company.whatsapp) : null,
+    company.email,
+    company.website,
+    company.address || company.city,
+  ].filter(Boolean).join("   •   ");
+
+  // Numeração e contato em todas as páginas.
   const total = doc.getNumberOfPages();
   for (let i = 1; i <= total; i++) {
     doc.setPage(i);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(140);
-    doc.text(`Página ${i} de ${total}`, W - M, H - 8, { align: "right" });
-    doc.text(draft ? "Rascunho — documento não publicado" : company.trade_name, M, H - 8);
+    doc.text(`Página ${i} de ${total}`, W - M, H - 7, { align: "right" });
+    const footerText = draft
+      ? `Rascunho — documento não publicado${companyContacts ? `   •   ${companyContacts}` : ""}`
+      : companyContacts || company.trade_name;
+    const footerLines = doc.splitTextToSize(footerText, CONTENT - 25) as string[];
+    doc.text(footerLines.slice(0, 1), M, H - 7);
   }
 
   doc.save(

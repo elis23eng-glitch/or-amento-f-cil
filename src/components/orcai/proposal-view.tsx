@@ -34,38 +34,35 @@ export function ProposalView({
           Rascunho — ainda não publicado
         </p>
       ) : null}
-      <header className="brand-gradient px-4 py-5 text-brand-foreground sm:px-6">
+      <header className="bg-card px-4 pt-6 sm:px-6 sm:pt-8">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:flex sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={`Logo de ${company.trade_name}`}
-                className="size-14 shrink-0 rounded-lg bg-card object-contain p-1"
+                className="size-12 shrink-0 object-contain"
               />
             ) : null}
             <div className="min-w-0">
-              <h2 className="font-display text-lg font-extrabold leading-tight">
+              <h2 className="font-display text-lg font-extrabold leading-tight text-brand">
                 {company.trade_name}
               </h2>
-              <ul className="mt-1 space-y-0.5 text-xs opacity-90">
-                {company.responsible_name ? <li>Responsável: {company.responsible_name}</li> : null}
-                {company.whatsapp ? <li>WhatsApp: {formatBRPhone(company.whatsapp)}</li> : null}
-                {company.city ? <li>{company.city}</li> : null}
-                {company.cnpj ? <li>CNPJ: {company.cnpj}</li> : null}
-                {company.email ? <li>{company.email}</li> : null}
-                {company.address ? <li>{company.address}</li> : null}
-                {company.website ? <li>{company.website}</li> : null}
-              </ul>
+              {company.responsible_name ? (
+                <p className="mt-1 text-[0.65rem] font-semibold uppercase text-muted-foreground">
+                  Responsável: {company.responsible_name}
+                </p>
+              ) : null}
             </div>
           </div>
-          <div className="shrink-0 text-right text-xs">
-            <p className="font-display text-sm font-extrabold">Orçamento nº {quote.number}</p>
-            <p className="opacity-90">Data: {formatDateBR(quote.quote_date)}</p>
-            <p className="opacity-90">Validade: {formatDateBR(quote.valid_until)}</p>
-            {version ? <p className="opacity-75">Versão {version}</p> : null}
+          <div className="shrink-0 text-right text-xs text-muted-foreground">
+            <p className="text-[0.62rem] font-extrabold uppercase text-foreground">Proposta comercial</p>
+            <p className="font-display text-sm font-extrabold text-brand">ORC-{String(quote.number).padStart(4, "0")}</p>
+            <p>Emitida em {formatDateBR(quote.quote_date)}</p>
+            {version ? <p>Versão {version}</p> : null}
           </div>
         </div>
+        <div className="mt-5 border-b border-border" />
       </header>
 
       <div className="px-4 pb-6 sm:px-6">
@@ -164,6 +161,26 @@ export function ProposalView({
           </Block>
         ) : null}
       </div>
+
+      <footer className="px-4 pb-6 pt-8 sm:px-6 sm:pb-8">
+        <div className="grid gap-8 sm:grid-cols-2 sm:gap-10">
+          <div className="border-t border-border pt-2 text-center">
+            <p className="text-sm font-semibold text-foreground">{company.trade_name}</p>
+            <p className="text-[0.65rem] font-semibold uppercase text-muted-foreground">Contratada</p>
+          </div>
+          <div className="border-t border-border pt-2 text-center">
+            <p className="text-sm font-semibold text-foreground">{quote.client_name || "Cliente"}</p>
+            <p className="text-[0.65rem] font-semibold uppercase text-muted-foreground">Contratante</p>
+          </div>
+        </div>
+        <ul className="mt-7 flex flex-wrap justify-center gap-x-4 gap-y-1 border-t border-border pt-3 text-center text-[0.65rem] text-muted-foreground">
+          {company.cnpj ? <li>CNPJ {company.cnpj}</li> : null}
+          {company.whatsapp ? <li>{formatBRPhone(company.whatsapp)}</li> : null}
+          {company.email ? <li>{company.email}</li> : null}
+          {company.website ? <li>{company.website}</li> : null}
+          {company.address ? <li>{company.address}</li> : company.city ? <li>{company.city}</li> : null}
+        </ul>
+      </footer>
     </article>
   );
 }

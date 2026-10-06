@@ -223,7 +223,7 @@ export async function generateQuotePdf(options: {
   }
 
   // Rodapé no estilo do modelo: assinaturas e dados de contato da empresa.
-  if (ctx.y > H - 55) addPage(ctx, runningTitle);
+  if (ctx.y > H - 38) addPage(ctx, runningTitle);
   const signatureY = Math.max(ctx.y + 12, H - 42);
   const signatureWidth = 82;
   doc.setDrawColor(190, 200, 210);

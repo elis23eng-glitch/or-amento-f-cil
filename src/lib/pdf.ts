@@ -81,8 +81,8 @@ export async function generateQuotePdf(options: {
   doc.setTextColor(60);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
-  if (company.responsible_name)
-    doc.text(`RESPONSÁVEL: ${company.responsible_name}`.toUpperCase(), headerTextX, ctx.y + 10);
+  const headerText = company.proposal_header_text || (company.responsible_name ? `Responsável: ${company.responsible_name}` : "");
+  if (headerText) doc.text(headerText.toUpperCase(), headerTextX, ctx.y + 10);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
@@ -241,6 +241,7 @@ export async function generateQuotePdf(options: {
   doc.text("CONTRATANTE", W - M - signatureWidth / 2, signatureY + 9, { align: "center" });
 
   const companyContacts = [
+    company.proposal_footer_text,
     company.cnpj ? `CNPJ ${company.cnpj}` : null,
     company.whatsapp ? formatBRPhone(company.whatsapp) : null,
     company.email,

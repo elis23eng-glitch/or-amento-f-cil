@@ -329,6 +329,8 @@ function QuoteEditor() {
       address: company?.address ?? null,
       website: company?.website ?? null,
       logo_path: company?.logo_path ?? null,
+      proposal_header_text: company?.proposal_header_text ?? null,
+      proposal_footer_text: company?.proposal_footer_text ?? null,
     },
     quote: {
       number,

@@ -395,6 +395,8 @@ export const publishQuote = createServerFn({ method: "POST" })
         address: company.address,
         website: company.website,
         logo_path: company.logo_path,
+        proposal_header_text: company.proposal_header_text,
+        proposal_footer_text: company.proposal_footer_text,
       },
       quote: {
         number: quote.number,

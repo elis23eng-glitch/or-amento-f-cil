@@ -132,6 +132,8 @@ export type Database = {
           id: string
           logo_path: string | null
           owner_id: string
+          proposal_footer_text: string | null
+          proposal_header_text: string | null
           responsible_name: string | null
           trade_name: string
           updated_at: string
@@ -147,6 +149,8 @@ export type Database = {
           id?: string
           logo_path?: string | null
           owner_id: string
+          proposal_footer_text?: string | null
+          proposal_header_text?: string | null
           responsible_name?: string | null
           trade_name: string
           updated_at?: string
@@ -162,6 +166,8 @@ export type Database = {
           id?: string
           logo_path?: string | null
           owner_id?: string
+          proposal_footer_text?: string | null
+          proposal_header_text?: string | null
           responsible_name?: string | null
           trade_name?: string
           updated_at?: string

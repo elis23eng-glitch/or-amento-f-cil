@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/components/orcai/field";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeBRPhone, formatBRPhone } from "@/lib/phone";
@@ -23,9 +24,14 @@ const schema = z.object({
   email: z.string().trim().max(255).refine((v) => !v || z.string().email().safeParse(v).success, "E-mail inválido"),
   address: z.string().trim().max(300),
   website: z.string().trim().max(200),
+  proposal_header_text: z.string().trim().max(180),
+  proposal_footer_text: z.string().trim().max(500),
 });
 
-const EMPTY = { trade_name: "", responsible_name: "", whatsapp: "", city: "", cnpj: "", email: "", address: "", website: "" };
+const EMPTY = {
+  trade_name: "", responsible_name: "", whatsapp: "", city: "", cnpj: "", email: "", address: "", website: "",
+  proposal_header_text: "", proposal_footer_text: "",
+};
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 
 function CompanyPage() {
@@ -53,6 +59,7 @@ function CompanyPage() {
     if (c) setForm({
       trade_name: c.trade_name ?? "", responsible_name: c.responsible_name ?? "", whatsapp: c.whatsapp ? formatBRPhone(c.whatsapp) : "",
       city: c.city ?? "", cnpj: c.cnpj ?? "", email: c.email ?? "", address: c.address ?? "", website: c.website ?? "",
+      proposal_header_text: c.proposal_header_text ?? "", proposal_footer_text: c.proposal_footer_text ?? "",
     });
   }, [q.data]);
 
@@ -71,6 +78,7 @@ function CompanyPage() {
       owner_id: u.user!.id, trade_name: parsed.data.trade_name, responsible_name: n(parsed.data.responsible_name),
       whatsapp: form.whatsapp ? normalizeBRPhone(form.whatsapp) : null, city: n(parsed.data.city), cnpj: n(parsed.data.cnpj),
       email: n(parsed.data.email), address: n(parsed.data.address), website: n(parsed.data.website), updated_at: new Date().toISOString(),
+      proposal_header_text: n(parsed.data.proposal_header_text), proposal_footer_text: n(parsed.data.proposal_footer_text),
     };
     const existing = q.data?.company;
     const { error } = existing
@@ -124,6 +132,37 @@ function CompanyPage() {
         {F("email", "E-mail (opcional)", { type: "email" })}
         {F("address", "Endereço (opcional)")}
         {F("website", "Site ou rede social (opcional)")}
+        <div className="grid gap-4 border-t border-border pt-4 sm:col-span-2 sm:grid-cols-2">
+          <Field
+            label="Texto do cabeçalho da proposta"
+            hint="Ex.: Reformas e acabamentos residenciais. Se ficar vazio, será exibido o nome do responsável."
+            error={errors["proposal_header_text"]}
+          >
+            {(p) => (
+              <Input
+                {...p}
+                value={form.proposal_header_text}
+                maxLength={180}
+                onChange={(e) => setForm({ ...form, proposal_header_text: e.target.value })}
+              />
+            )}
+          </Field>
+          <Field
+            label="Texto do rodapé da proposta"
+            hint="Ex.: Registro profissional, horário de atendimento ou outra informação comercial."
+            error={errors["proposal_footer_text"]}
+          >
+            {(p) => (
+              <Textarea
+                {...p}
+                rows={3}
+                value={form.proposal_footer_text}
+                maxLength={500}
+                onChange={(e) => setForm({ ...form, proposal_footer_text: e.target.value })}
+              />
+            )}
+          </Field>
+        </div>
         <Button type="submit" disabled={saving} className="h-11 bg-accent font-bold text-accent-foreground sm:col-span-2">
           {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Salvar empresa
         </Button>

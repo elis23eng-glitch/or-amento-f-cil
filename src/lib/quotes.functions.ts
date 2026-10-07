@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { computeTotals, itemTotalCents, quantityIsValid } from "./money";
 import type { QuoteSnapshot } from "./quote-snapshot";
+import { snapshotCompany } from "./snapshot-company";
 
 const itemSchema = z.object({
   description: z.string().trim().min(1, "Descreva o serviço ou material").max(300),
@@ -385,19 +386,7 @@ export const publishQuote = createServerFn({ method: "POST" })
     });
 
     const snapshot: QuoteSnapshot = {
-      company: {
-        trade_name: company.trade_name,
-        responsible_name: company.responsible_name,
-        whatsapp: company.whatsapp,
-        city: company.city,
-        cnpj: company.cnpj,
-        email: company.email,
-        address: company.address,
-        website: company.website,
-        logo_path: company.logo_path,
-        proposal_header_text: company.proposal_header_text,
-        proposal_footer_text: company.proposal_footer_text,
-      },
+      company: snapshotCompany(company),
       quote: {
         number: quote.number,
         quote_date: quote.quote_date,

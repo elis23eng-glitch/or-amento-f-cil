@@ -39,6 +39,7 @@ O MVP foi criado para validar a procura por uma ferramenta simples com teste gra
 - cadastro da empresa ou do profissional, sem obrigatoriedade de CNPJ;
 - logo opcional em armazenamento privado, com validação de arquivo;
 - dados da empresa usados nas propostas e nos PDFs;
+- textos próprios de cabeçalho e rodapé configurados em **Minha empresa**;
 - cadastro de clientes;
 - catálogo privado de serviços frequentes e preços próprios.
 
@@ -54,6 +55,7 @@ O MVP foi criado para validar a procura por uma ferramenta simples com teste gra
 - recálculo e validação dos totais no servidor;
 - prévia atualizada durante a edição e aviso de alterações não salvas;
 - publicação em versão congelada: mudanças posteriores não alteram a proposta já enviada;
+- textos de cabeçalho e rodapé entram apenas em novas versões depois de alterados;
 - versões sucessivas, revogação do link e situações manuais de aprovação, recusa, vencimento e envio;
 - proposta pública por token aleatório, sem login e sem leitura anônima direta das tabelas;
 - aviso de validade vencida e mensagem neutra para link inválido ou revogado;
@@ -121,6 +123,12 @@ Para gerar uma versão de produção:
 bun run build
 ```
 
+Para executar os testes automatizados:
+
+```bash
+bun run test
+```
+
 As migrações do banco estão em `drizzle/migrations`. Elas criam as tabelas, tipos, índices, gatilhos e políticas de acesso. O bucket privado `logos` deve existir com limite de 2 MB; as políticas limitam cada arquivo à pasta do respectivo proprietário.
 
 ### Configuração da proprietária
@@ -163,9 +171,12 @@ Até a última atualização deste README:
 - a compilação de produção foi concluída sem erros;
 - a página inicial e a proposta fictícia foram abertas no ambiente de prévia;
 - as fórmulas de valores usam a mesma função compartilhada na prévia e no snapshot salvo;
-- o cabeçalho e o rodapé do PDF foram conferidos visualmente após a adaptação ao modelo enviado.
+- o cabeçalho e o rodapé do PDF foram conferidos visualmente após a adaptação ao modelo enviado;
+- testes automatizados verificam que textos alterados aparecem somente em novas versões e não modificam propostas publicadas;
 
-O projeto ainda **não possui uma suíte automatizada**. Os 15 cenários completos de aceite descritos para o MVP ainda não foram executados ponta a ponta; portanto, persistência entre sessões, isolamento entre duas contas reais, revogação em janela anônima, fluxo de assinatura administrativa e PDFs extensos devem ser considerados pendentes de validação integral antes da publicação.
+Os 15 cenários completos de aceite descritos para o MVP ainda não foram executados ponta a ponta; portanto, persistência entre sessões, isolamento entre duas contas reais, revogação em janela anônima, fluxo de assinatura administrativa e PDFs extensos devem ser considerados pendentes de validação integral antes da publicação.
+
+Detalhes: [`docs/TESTING.md`](docs/TESTING.md).
 
 ## Limitações conhecidas
 
@@ -181,3 +192,9 @@ O projeto ainda **não possui uma suíte automatizada**. Os 15 cenários complet
 ## Estado do MVP
 
 O fluxo principal está implementado, mas a aplicação deve permanecer em prévia até a configuração da proprietária, a revisão final de segurança e a execução documentada dos testes de aceite.
+
+## Documentação adicional
+
+- [Arquitetura e versões imutáveis](docs/ARCHITECTURE.md)
+- [Operação, configuração e GitHub](docs/OPERATIONS.md)
+- [Testes automatizados e roteiro manual](docs/TESTING.md)

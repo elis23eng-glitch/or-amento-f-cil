@@ -136,7 +136,7 @@ function CompanyPage() {
           <Field
             label="Texto do cabeçalho da proposta"
             hint="Ex.: Reformas e acabamentos residenciais. Se ficar vazio, será exibido o nome do responsável."
-            error={errors.proposal_header_text}
+            error={errors["proposal_header_text"]}
           >
             {(p) => (
               <Input
@@ -150,7 +150,7 @@ function CompanyPage() {
           <Field
             label="Texto do rodapé da proposta"
             hint="Ex.: Registro profissional, horário de atendimento ou outra informação comercial."
-            error={errors.proposal_footer_text}
+            error={errors["proposal_footer_text"]}
           >
             {(p) => (
               <Textarea

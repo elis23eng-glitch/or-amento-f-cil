@@ -15,6 +15,13 @@
       "when": 1790721771503,
       "tag": "0001_logos_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791339327058,
+      "tag": "0002_add_company_proposal_texts",
+      "breakpoints": true
     }
   ]
 }

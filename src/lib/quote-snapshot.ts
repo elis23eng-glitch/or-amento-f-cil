@@ -10,6 +10,8 @@ export type SnapshotCompany = {
   address: string | null;
   website: string | null;
   logo_path: string | null;
+  proposal_header_text?: string | null;
+  proposal_footer_text?: string | null;
 };
 
 export type SnapshotItem = {

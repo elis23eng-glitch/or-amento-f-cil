@@ -48,9 +48,9 @@ export function ProposalView({
               <h2 className="font-display text-lg font-extrabold leading-tight text-brand">
                 {company.trade_name}
               </h2>
-              {company.responsible_name ? (
+              {company.proposal_header_text || company.responsible_name ? (
                 <p className="mt-1 text-[0.65rem] font-semibold uppercase text-muted-foreground">
-                  Responsável: {company.responsible_name}
+                  {company.proposal_header_text || `Responsável: ${company.responsible_name}`}
                 </p>
               ) : null}
             </div>
@@ -174,6 +174,7 @@ export function ProposalView({
           </div>
         </div>
         <ul className="mt-7 flex flex-wrap justify-center gap-x-4 gap-y-1 border-t border-border pt-3 text-center text-[0.65rem] text-muted-foreground">
+          {company.proposal_footer_text ? <li className="basis-full whitespace-pre-line">{company.proposal_footer_text}</li> : null}
           {company.cnpj ? <li>CNPJ {company.cnpj}</li> : null}
           {company.whatsapp ? <li>{formatBRPhone(company.whatsapp)}</li> : null}
           {company.email ? <li>{company.email}</li> : null}

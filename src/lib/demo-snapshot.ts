@@ -21,6 +21,8 @@ export const DEMO_SNAPSHOT: QuoteSnapshot = {
     address: null,
     website: null,
     logo_path: null,
+    proposal_header_text: "Reformas e acabamentos residenciais",
+    proposal_footer_text: null,
   },
   quote: {
     number: 1,

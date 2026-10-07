@@ -171,7 +171,7 @@ Até a última atualização deste README:
 - a compilação de produção foi concluída sem erros;
 - a página inicial e a proposta fictícia foram abertas no ambiente de prévia;
 - as fórmulas de valores usam a mesma função compartilhada na prévia e no snapshot salvo;
-- o cabeçalho e o rodapé do PDF foram conferidos visualmente após a adaptação ao modelo enviado.
+- o cabeçalho e o rodapé do PDF foram conferidos visualmente após a adaptação ao modelo enviado;
 - testes automatizados verificam que textos alterados aparecem somente em novas versões e não modificam propostas publicadas;
 
 Os 15 cenários completos de aceite descritos para o MVP ainda não foram executados ponta a ponta; portanto, persistência entre sessões, isolamento entre duas contas reais, revogação em janela anônima, fluxo de assinatura administrativa e PDFs extensos devem ser considerados pendentes de validação integral antes da publicação.

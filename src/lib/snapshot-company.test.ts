@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { SnapshotCompany } from "./quote-snapshot";
 import { snapshotCompany, type CompanyProposalSource } from "./snapshot-company";
 
 function company(overrides: Partial<CompanyProposalSource> = {}): CompanyProposalSource {
@@ -58,7 +59,7 @@ describe("snapshot dos dados da empresa na proposta", () => {
   });
 
   it("mantém compatibilidade de leitura com versões antigas sem os campos opcionais", () => {
-    const oldPublishedCompany = {
+    const oldPublishedCompany: SnapshotCompany = {
       trade_name: "Empresa Antiga",
       responsible_name: null,
       whatsapp: null,

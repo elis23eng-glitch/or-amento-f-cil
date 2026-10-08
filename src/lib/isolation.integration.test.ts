@@ -85,7 +85,7 @@ describe.skipIf(!ready)("isolamento entre usuários (banco real)", () => {
     const { error: e3 } = await B.c.from("quote_items").insert({ quote_id: quoteId, owner_id: B.id, description: "x", quantity: 1 });
     expect(e1).not.toBeNull();
     expect(e2).not.toBeNull();
-    // e3: B usa o próprio id; mesmo que entre, A não passa a ver item de B
+    expect(e3).not.toBeNull(); // não pode anexar itens ao orçamento de outro
     const { data } = await A.c.from("quote_items").select("owner_id").eq("quote_id", quoteId);
     expect((data ?? []).every((i) => i.owner_id === A.id)).toBe(true);
     if (!e3) await B.c.from("quote_items").delete().eq("quote_id", quoteId).eq("owner_id", B.id);

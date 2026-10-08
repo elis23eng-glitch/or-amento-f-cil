@@ -28,3 +28,13 @@ A suíte `src/lib/snapshot-company.test.ts` comprova que:
 ## Integração contínua
 
 O arquivo `.github/workflows/verify.yml` executa testes e compilação em propostas de alteração e envios para a branch principal.
+## Isolamento entre usuários
+
+- `src/lib/access-guards.test.ts` (sempre roda): confere que toda função de backend privada exige login, filtra pelo dono e que as funções administrativas checam o papel de administradora.
+- `src/lib/isolation.integration.test.ts` (banco real): duas contas de teste tentam ler, alterar, excluir e criar orçamentos, itens, empresa, versões, links e logos uma da outra; também confere que visitantes sem login não leem tabelas privadas. Para rodar, cadastre duas contas de teste e defina:
+
+```
+ISOLATION_A_EMAIL=... ISOLATION_A_PASSWORD=... ISOLATION_B_EMAIL=... ISOLATION_B_PASSWORD=... bun run test
+```
+
+Sem essas variáveis o teste aparece como "skipped" (ignorado), nunca como aprovado.

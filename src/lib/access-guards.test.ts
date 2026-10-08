@@ -13,7 +13,7 @@ const read = (f: string) => readFileSync(resolve(__dirname, f), "utf8");
 function serverFns(source: string) {
   const parts = source.split(/export const (\w+) = createServerFn/);
   const out: { name: string; body: string }[] = [];
-  for (let i = 1; i < parts.length; i += 2) out.push({ name: parts[i], body: parts[i + 1] });
+  for (let i = 1; i < parts.length; i += 2) out.push({ name: parts[i] ?? "", body: parts[i + 1] ?? "" });
   return out;
 }
 

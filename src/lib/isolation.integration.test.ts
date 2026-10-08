@@ -11,10 +11,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
  * Sem elas, o teste é ignorado (não conta como aprovado).
  */
 const env = process.env;
-const url = env.VITE_SUPABASE_URL ?? env.SUPABASE_URL;
-const key = env.VITE_SUPABASE_PUBLISHABLE_KEY ?? env.SUPABASE_PUBLISHABLE_KEY;
+const url = env["VITE_SUPABASE_URL"] ?? env["SUPABASE_URL"];
+const key = env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? env["SUPABASE_PUBLISHABLE_KEY"];
 const ready =
-  !!url && !!key && !!env.ISOLATION_A_EMAIL && !!env.ISOLATION_A_PASSWORD && !!env.ISOLATION_B_EMAIL && !!env.ISOLATION_B_PASSWORD;
+  !!url && !!key && !!env["ISOLATION_A_EMAIL"] && !!env["ISOLATION_A_PASSWORD"] && !!env["ISOLATION_B_EMAIL"] && !!env["ISOLATION_B_PASSWORD"];
 
 async function login(email: string, password: string) {
   const c = createClient(url!, key!, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -29,8 +29,8 @@ describe.skipIf(!ready)("isolamento entre usuários (banco real)", () => {
   let quoteId: string;
 
   beforeAll(async () => {
-    A = await login(env.ISOLATION_A_EMAIL!, env.ISOLATION_A_PASSWORD!);
-    B = await login(env.ISOLATION_B_EMAIL!, env.ISOLATION_B_PASSWORD!);
+    A = await login(env["ISOLATION_A_EMAIL"]!, env["ISOLATION_A_PASSWORD"]!);
+    B = await login(env["ISOLATION_B_EMAIL"]!, env["ISOLATION_B_PASSWORD"]!);
     const { data: company } = await A.c.from("companies").select("id").eq("owner_id", A.id).maybeSingle();
     if (!company) await A.c.from("companies").insert({ owner_id: A.id, trade_name: "Teste isolamento A" });
     const { data, error } = await A.c

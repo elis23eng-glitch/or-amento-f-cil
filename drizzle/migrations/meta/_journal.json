@@ -29,6 +29,13 @@
       "when": 1791423242130,
       "tag": "0003_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791511823756,
+      "tag": "0004_quotes_client_ref_idempotency",
+      "breakpoints": true
     }
   ]
 }

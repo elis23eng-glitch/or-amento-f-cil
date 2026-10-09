@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { computeTotals, itemTotalCents, quantityIsValid } from "./money";
 import type { QuoteSnapshot } from "./quote-snapshot";
 import { snapshotCompany } from "./snapshot-company";
+import { quoteMatchesSnapshot } from "./publish-state";
 
 const itemSchema = z.object({
   description: z.string().trim().min(1, "Descreva o serviço ou material").max(300),
@@ -14,6 +15,7 @@ const itemSchema = z.object({
 
 const quoteSchema = z.object({
   id: z.string().uuid().nullable().optional(),
+  client_ref: z.string().uuid().nullable().optional(),
   quote_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   client_id: z.string().uuid().nullable().optional(),
   client_name: z.string().trim().min(1, "Informe o nome do cliente").max(160),
@@ -140,11 +142,33 @@ export const getQuote = createServerFn({ method: "GET" })
       .eq("quote_id", data.id)
       .order("created_at", { ascending: false });
 
+    const parsedItems = (items ?? []).map((i) => ({ ...i, quantity: Number(i.quantity) }));
+    let latestMatches = false;
+    const latest = versions?.[0];
+    if (latest) {
+      const { data: v } = await context.supabase
+        .from("quote_versions")
+        .select("snapshot")
+        .eq("id", latest.id)
+        .maybeSingle();
+      latestMatches = quoteMatchesSnapshot(
+        {
+          ...quote,
+          extra_costs_cents: Number(quote.extra_costs_cents),
+          discount_cents: Number(quote.discount_cents),
+          tax_percent: Number(quote.tax_percent),
+          bdi_percent: Number(quote.bdi_percent),
+        },
+        parsedItems,
+        v?.snapshot as unknown as QuoteSnapshot,
+      );
+    }
     return {
       quote,
-      items: (items ?? []).map((i) => ({ ...i, quantity: Number(i.quantity) })),
+      items: parsedItems,
       versions: versions ?? [],
       tokens: tokens ?? [],
+      latestMatches,
     };
   });
 
@@ -204,6 +228,18 @@ export const saveQuote = createServerFn({ method: "POST" })
 
     let quoteId = data.id ?? null;
 
+    // Idempotência: um novo envio do mesmo editor (clique repetido ou nova tentativa)
+    // atualiza o orçamento já criado em vez de criar outro.
+    if (!quoteId && data.client_ref) {
+      const { data: existing } = await supabase
+        .from("quotes")
+        .select("id")
+        .eq("owner_id", userId)
+        .eq("client_ref", data.client_ref)
+        .maybeSingle();
+      if (existing) quoteId = existing.id;
+    }
+
     if (quoteId) {
       const { error } = await supabase
         .from("quotes")
@@ -221,11 +257,22 @@ export const saveQuote = createServerFn({ method: "POST" })
       const number = (last?.[0]?.number ?? 0) + 1;
       const { data: created, error } = await supabase
         .from("quotes")
-        .insert({ ...base, number, status: "rascunho" })
+        .insert({ ...base, number, status: "rascunho", client_ref: data.client_ref ?? null })
         .select("id")
         .single();
-      if (error) throw new Error(error.message);
-      quoteId = created.id;
+      if (error) {
+        if (error.code === "23505" && data.client_ref) {
+          const { data: existing } = await supabase
+            .from("quotes")
+            .select("id")
+            .eq("owner_id", userId)
+            .eq("client_ref", data.client_ref)
+            .maybeSingle();
+          if (!existing) throw new Error(error.message);
+          quoteId = existing.id;
+          await supabase.from("quotes").update(base).eq("id", quoteId).eq("owner_id", userId);
+        } else throw new Error(error.message);
+      } else quoteId = created.id;
     }
 
     await supabase.from("quote_items").delete().eq("quote_id", quoteId).eq("owner_id", userId);
@@ -245,7 +292,13 @@ export const saveQuote = createServerFn({ method: "POST" })
       if (itemsError) throw new Error(itemsError.message);
     }
 
-    return { id: quoteId as string, totals };
+    const { data: saved } = await supabase
+      .from("quotes")
+      .select("number")
+      .eq("id", quoteId as string)
+      .eq("owner_id", userId)
+      .single();
+    return { id: quoteId as string, number: saved?.number ?? 0, totals };
   });
 
 export const deleteQuote = createServerFn({ method: "POST" })
@@ -460,6 +513,8 @@ export const publishQuote = createServerFn({ method: "POST" })
       token,
       version: version.version,
       version_id: version.id,
+      quote_id: data.id,
+      number: quote.number,
       url: `${requestOrigin()}/orcamento/${token}`,
       total_cents: totals.total_cents,
     };

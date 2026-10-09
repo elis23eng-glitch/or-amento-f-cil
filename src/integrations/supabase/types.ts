@@ -390,6 +390,7 @@ export type Database = {
           client_kind: Database["public"]["Enums"]["client_kind"]
           client_name: string
           client_phone: string | null
+          client_ref: string | null
           created_at: string
           description: string | null
           discount_cents: number
@@ -420,6 +421,7 @@ export type Database = {
           client_kind?: Database["public"]["Enums"]["client_kind"]
           client_name?: string
           client_phone?: string | null
+          client_ref?: string | null
           created_at?: string
           description?: string | null
           discount_cents?: number
@@ -450,6 +452,7 @@ export type Database = {
           client_kind?: Database["public"]["Enums"]["client_kind"]
           client_name?: string
           client_phone?: string | null
+          client_ref?: string | null
           created_at?: string
           description?: string | null
           discount_cents?: number

@@ -15,6 +15,7 @@ import {
 import { Field } from "./field";
 import { submitLead } from "@/lib/leads.functions";
 import { waLink } from "@/lib/phone";
+import { validateLead, type LeadErrors } from "@/lib/lead-validation";
 
 const EMPTY = {
   name: "",
@@ -30,11 +31,19 @@ export function LeadForm({ defaultInterest }: { defaultInterest?: "testar" | "co
   const [form, setForm] = useState({ ...EMPTY, interest: defaultInterest ?? "testar" });
   const [status, setStatus] = useState<"idle" | "loading" | "saved" | "pending">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<LeadErrors>({});
   const send = useServerFn(submitLead);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+    const check = validateLead(form);
+    if (!check.ok) {
+      setFieldErrors(check.errors);
+      setError("Confira os campos destacados.");
+      return;
+    }
+    setFieldErrors({});
     setStatus("loading");
     try {
       // O lead é salvo ANTES de qualquer tentativa de abrir o WhatsApp.
@@ -53,8 +62,11 @@ export function LeadForm({ defaultInterest }: { defaultInterest?: "testar" | "co
       }
     } catch (e) {
       setStatus("idle");
+      const raw = e instanceof Error ? e.message : "";
       const message =
-        e instanceof Error ? e.message : "Não foi possível enviar agora. Tente novamente.";
+        raw && !raw.trim().startsWith("[") && !raw.trim().startsWith("{")
+          ? raw
+          : "Não foi possível enviar agora. Confira os dados e tente novamente.";
       setError(message);
       toast.error(message);
     }
@@ -92,19 +104,20 @@ export function LeadForm({ defaultInterest }: { defaultInterest?: "testar" | "co
         </p>
       </div>
 
-      <Field label="Nome" required>
+      <Field label="Nome" error={fieldErrors.name} required>
         {(p) => (
           <Input
             {...p}
             value={form.name}
             autoComplete="name"
             required
+            aria-invalid={!!fieldErrors.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
         )}
       </Field>
 
-      <Field label="WhatsApp" hint="Com DDD, por exemplo (11) 91234-5678." required>
+      <Field label="WhatsApp" hint="Com DDD, por exemplo (11) 91234-5678." error={fieldErrors.whatsapp} required>
         {(p) => (
           <Input
             {...p}
@@ -112,29 +125,32 @@ export function LeadForm({ defaultInterest }: { defaultInterest?: "testar" | "co
             inputMode="tel"
             autoComplete="tel"
             required
+            aria-invalid={!!fieldErrors.whatsapp}
             onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
           />
         )}
       </Field>
 
-      <Field label="Profissão ou tipo de serviço" required>
+      <Field label="Profissão ou tipo de serviço" error={fieldErrors.profession} required>
         {(p) => (
           <Input
             {...p}
             value={form.profession}
             placeholder="Pintor, eletricista, construtor…"
             required
+            aria-invalid={!!fieldErrors.profession}
             onChange={(e) => setForm({ ...form, profession: e.target.value })}
           />
         )}
       </Field>
 
-      <Field label="Cidade" required>
+      <Field label="Cidade" error={fieldErrors.city} required>
         {(p) => (
           <Input
             {...p}
             value={form.city}
             required
+            aria-invalid={!!fieldErrors.city}
             onChange={(e) => setForm({ ...form, city: e.target.value })}
           />
         )}

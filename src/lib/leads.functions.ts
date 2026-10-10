@@ -1,16 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import { validateLead } from "./lead-validation";
 import { normalizeBRPhone } from "./phone";
-
-const leadSchema = z.object({
-  name: z.string().trim().min(2, "Informe seu nome").max(120),
-  whatsapp: z.string().trim().min(10, "Informe um WhatsApp válido").max(40),
-  profession: z.string().trim().min(2, "Informe sua profissão ou tipo de serviço").max(120),
-  city: z.string().trim().min(2, "Informe sua cidade").max(120),
-  monthly_quotes: z.string().trim().min(1, "Informe quantos orçamentos faz por mês").max(40),
-  interest: z.enum(["testar", "contratar"]),
-  marketing_consent: z.boolean(),
-});
 
 /** Telefone da administradora — público apenas como "configurado / não configurado" + número. */
 export const getAdminWhatsapp = createServerFn({ method: "GET" }).handler(async () => {
@@ -25,7 +15,13 @@ export const getAdminWhatsapp = createServerFn({ method: "GET" }).handler(async 
 });
 
 export const submitLead = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => leadSchema.parse(input))
+  .inputValidator((input: unknown) => {
+    const r = validateLead(input);
+    if (!r.ok) {
+      throw new Error(Object.values(r.errors)[0] ?? "Confira os dados do formulário.");
+    }
+    return r.data;
+  })
   .handler(async ({ data }) => {
     const phone = normalizeBRPhone(data.whatsapp);
     if (!phone) {

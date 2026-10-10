@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -62,6 +62,7 @@ import {
 import { normalizeBRPhone, waLink } from "@/lib/phone";
 import { PROJECT_TYPES, SERVICE_SUGGESTIONS, type QuoteSnapshot } from "@/lib/quote-snapshot";
 import { useAccess } from "./painel";
+import { previewBanner } from "@/lib/publish-state";
 
 export const Route = createFileRoute("/_authenticated/painel/orcamentos/$id")({
   component: QuoteEditor,
@@ -237,6 +238,17 @@ function QuoteEditor() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [lastShare, setLastShare] = useState<{ url: string; message: string } | null>(null);
+  // Mantém o ID após o primeiro salvamento e evita gravações simultâneas/duplicadas.
+  const savedIdRef = useRef<string | null>(isNew ? null : id);
+  const clientRefRef = useRef<string>(crypto.randomUUID());
+  const dirtyRef = useRef(false);
+  const saveInFlight = useRef<Promise<string | null> | null>(null);
+  useEffect(() => {
+    dirtyRef.current = dirty;
+  }, [dirty]);
+  useEffect(() => {
+    if (!isNew) savedIdRef.current = id;
+  }, [id, isNew]);
 
   useEffect(() => {
     if (isNew) {
@@ -281,7 +293,7 @@ function QuoteEditor() {
   // Aviso de alterações não salvas
   useBlocker({
     shouldBlockFn: () => {
-      if (!dirty) return false;
+      if (!dirtyRef.current) return false;
       return !window.confirm("Há alterações não salvas. Deseja sair mesmo assim?");
     },
     enableBeforeUnload: dirty,
@@ -347,21 +359,33 @@ function QuoteEditor() {
   const canCreate = access.data?.can_create ?? true;
   const readOnlyNew = isNew && !canCreate;
 
-  async function doSave(): Promise<string | null> {
+  function doSave(): Promise<string | null> {
+    if (saveInFlight.current) return saveInFlight.current;
+    const p = doSaveInner().finally(() => {
+      saveInFlight.current = null;
+    });
+    saveInFlight.current = p;
+    return p;
+  }
+
+  async function doSaveInner(): Promise<string | null> {
     if (built.errors.length) {
       setErrors(built.errors);
       toast.error("Corrija os campos destacados.");
       return null;
     }
     setErrors([]);
-    const result = await saveQuote({ data: { ...built.payload, id: isNew ? null : id } });
+    const result = await saveQuote({
+      data: { ...built.payload, id: savedIdRef.current, client_ref: clientRefRef.current },
+    });
+    savedIdRef.current = result.id;
+    dirtyRef.current = false;
     setDirty(false);
     qc.invalidateQueries({ queryKey: ["quotes"] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
+    await qc.invalidateQueries({ queryKey: ["quote", result.id] });
     if (isNew) {
-      navigate({ to: "/painel/orcamentos/$id", params: { id: result.id }, replace: true });
-    } else {
-      await qc.invalidateQueries({ queryKey: ["quote", id] });
+      await navigate({ to: "/painel/orcamentos/$id", params: { id: result.id }, replace: true });
     }
     return result.id;
   }
@@ -383,41 +407,42 @@ function QuoteEditor() {
     if (savedId) toast.success("Rascunho salvo.");
   }
 
-  async function ensurePublished(): Promise<{ url: string; total_cents: number } | null> {
-    const savedId = dirty || isNew ? await doSave() : id;
+  async function ensurePublished(): Promise<{ url: string; total_cents: number; number: number } | null> {
+    const savedId = dirtyRef.current || !savedIdRef.current ? await doSave() : savedIdRef.current;
     if (!savedId) return null;
     const fresh = await getQuote({ data: { id: savedId } });
     const latest = fresh.versions[0];
     const activeToken = latest
       ? fresh.tokens.find((t) => t.version_id === latest.id && !t.revoked_at)
       : undefined;
-    const stale =
-      !latest ||
-      new Date(fresh.quote.updated_at).getTime() - new Date(latest.published_at).getTime() > 5000;
-    if (!stale && activeToken && latest) {
-      return { url: `${window.location.origin}/orcamento/${activeToken.token}`, total_cents: latest.total_cents };
+    if (fresh.latestMatches && activeToken && latest) {
+      return {
+        url: `${window.location.origin}/orcamento/${activeToken.token}`,
+        total_cents: latest.total_cents,
+        number: fresh.quote.number,
+      };
     }
     const pub = await publishQuote({ data: { id: savedId } });
     await qc.invalidateQueries({ queryKey: ["quote", savedId] });
     qc.invalidateQueries({ queryKey: ["dashboard"] });
     toast.success(`Proposta publicada (versão ${pub.version}).`);
-    return { url: pub.url, total_cents: pub.total_cents };
+    return { url: pub.url, total_cents: pub.total_cents, number: pub.number };
   }
 
-  function buildMessage(url: string, total: number) {
-    return `Olá, ${form.client_name.trim()}! Segue a proposta ${number} da ${company?.trade_name ?? ""}, no valor de ${formatCents(total)}. Você pode visualizar os serviços e as condições neste link: ${url}. Qualquer dúvida, estou à disposição!`;
+  function buildMessage(url: string, total: number, num: number) {
+    return `Olá, ${form.client_name.trim()}! Segue a proposta ${num} da ${company?.trade_name ?? ""}, no valor de ${formatCents(total)}. Você pode visualizar os serviços e as condições neste link: ${url}. Qualquer dúvida, estou à disposição!`;
   }
 
   async function handlePublish() {
     const r = await run("publish", async () => {
-      const savedId = dirty || isNew ? await doSave() : id;
+      const savedId = dirtyRef.current || !savedIdRef.current ? await doSave() : savedIdRef.current;
       if (!savedId) return null;
       const pub = await publishQuote({ data: { id: savedId } });
       await qc.invalidateQueries({ queryKey: ["quote", savedId] });
       return pub;
     });
     if (r) {
-      setLastShare({ url: r.url, message: buildMessage(r.url, r.total_cents) });
+      setLastShare({ url: r.url, message: buildMessage(r.url, r.total_cents, r.number) });
       toast.success(`Proposta publicada (versão ${r.version}).`);
     }
   }
@@ -435,7 +460,7 @@ function QuoteEditor() {
       win?.close();
       return;
     }
-    const message = buildMessage(r.url, r.total_cents);
+    const message = buildMessage(r.url, r.total_cents, r.number);
     setLastShare({ url: r.url, message });
     const link = waLink(phone, message);
     if (win) win.location.href = link;
@@ -446,7 +471,7 @@ function QuoteEditor() {
   async function copyText(kind: "link" | "message") {
     const r = await run(kind, ensurePublished);
     if (!r) return;
-    const message = buildMessage(r.url, r.total_cents);
+    const message = buildMessage(r.url, r.total_cents, r.number);
     setLastShare({ url: r.url, message });
     try {
       await navigator.clipboard.writeText(kind === "link" ? r.url : message);
@@ -886,7 +911,15 @@ function QuoteEditor() {
             </div>
           ) : null}
 
-          <ProposalView snapshot={previewSnapshot} logoUrl={companyQ.data?.logoUrl} draft />
+          <ProposalView
+            snapshot={previewSnapshot}
+            logoUrl={companyQ.data?.logoUrl}
+            banner={previewBanner({
+              hasVersion: versions.length > 0,
+              savedMatchesLatest: !!quoteQ.data?.latestMatches,
+              dirty,
+            })}
+          />
         </aside>
       </div>
 

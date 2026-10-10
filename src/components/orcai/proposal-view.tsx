@@ -19,19 +19,29 @@ export function ProposalView({
   snapshot,
   logoUrl,
   draft,
+  banner,
   version,
 }: {
   snapshot: QuoteSnapshot;
   logoUrl?: string | null | undefined;
   draft?: boolean | undefined;
+  banner?: "draft" | "published" | "unpublished" | undefined;
   version?: number | null | undefined;
 }) {
   const { company, quote, items, totals } = snapshot;
   return (
     <article className="surface overflow-hidden">
-      {draft ? (
+      {(banner ?? (draft ? "draft" : null)) === "draft" ? (
         <p className="bg-warning/25 px-4 py-2 text-xs font-bold uppercase tracking-wide text-warning-foreground">
           Rascunho — ainda não publicado
+        </p>
+      ) : banner === "unpublished" ? (
+        <p className="bg-accent/15 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent">
+          Alterações ainda não publicadas — o link enviado mostra a versão anterior
+        </p>
+      ) : banner === "published" ? (
+        <p className="bg-whatsapp/15 px-4 py-2 text-xs font-bold uppercase tracking-wide text-foreground">
+          Proposta publicada
         </p>
       ) : null}
       <header className="bg-card px-4 pt-6 sm:px-6 sm:pt-8">
